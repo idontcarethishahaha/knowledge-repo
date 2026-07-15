@@ -32,23 +32,28 @@ jobs:
             STATS=$(git diff --stat "${BEFORE}..${AFTER}" | tail -1)
             ADDED=$(grep -oP '\d+(?= insertion)' <<< "$STATS" || echo 0)
             DELETED=$(grep -oP '\d+(?= deletion)' <<< "$STATS" || echo 0)
-            FILES=$(git diff --stat "${BEFORE}..${AFTER}" | head -10 | sed 's/|/\\|/' | sed 's/^/• /')
-            FILE_COUNT=$(($(git diff --stat "${BEFORE}..${AFTER}" | wc -l) - 1))
+            # sed '$d' 去掉最后一行汇总，只留文件列表
+            RAW_FILES=$(git diff --stat "${BEFORE}..${AFTER}" | sed '$d')
           else
             ADDED=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | tail -1 | grep -oP '\d+(?= insertion)' || echo 0)
             DELETED=0
-            FILES=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | head -10 | sed 's/|/\\|/' | sed 's/^/• /')
-            FILE_COUNT=$(($(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | wc -l) - 1))
+            RAW_FILES=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | sed '$d')
           fi
 
-          FILES_TOP=$(echo "$FILES" | head -5)
-          MORE_FILES=""
+          FILE_COUNT=$(echo "$RAW_FILES" | wc -l)
+
+          # 格式化每个文件行：提取文件名和变更数，只保留文件名（短的变更数在飞书卡片里不好看）
+          FORMATTED=$(echo "$RAW_FILES" | head -5 | while read -r line; do
+            FILE=$(echo "$line" | sed 's/|.*//' | xargs)
+            echo "• ${FILE}"
+          done)
+
           if [ "$FILE_COUNT" -gt 5 ]; then
-            MORE_FILES="... 等 ${FILE_COUNT} 个文件"
+            FILE_TEXT="${FORMATTED}
+          ... 等 ${FILE_COUNT} 个文件"
+          else
+            FILE_TEXT="${FORMATTED}"
           fi
-
-          FILE_TEXT="${FILES_TOP}
-          ${MORE_FILES}"
 
           curl -s -X POST "${{ secrets.FEISHU_WEBHOOK }}" \
             -H "Content-Type: application/json" \
