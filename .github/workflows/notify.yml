@@ -9,25 +9,85 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: 发消息到微信
         env:
           AUTHOR: ${{ github.event.head_commit.author.name }}
           MSG: ${{ github.event.head_commit.message }}
           URL: ${{ github.event.compare }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          PUSH_DATE: ${{ github.event.head_commit.timestamp }}
         run: |
-          # 多个 SendKey 用英文逗号隔开，例如: sctxxx1,sctxxx2
-          IFS=',' read -ra KEYS <<< "${{ secrets.SERVER_CHAN_KEYS }}"
+          # 时间格式化：转为北京时间
+          DATE=$(python3 -c "
+          from datetime import datetime, timezone, timedelta
+          dt = datetime.fromisoformat('${PUSH_DATE}').astimezone(timezone(timedelta(hours=8)))
+          print(dt.strftime('%Y-%m-%d %H:%M'))
+          ")
 
-          for KEY in "${KEYS[@]}"; do
-            curl -s -X POST "https://sctapi.ftqq.com/${KEY}.send" \
-              -H "Content-Type: application/json" \
-              -d "$(jq -n \
-                --arg author "${AUTHOR}" \
-                --arg msg "${MSG}" \
-                --arg url "${URL}" \
-                '{
-                  title: "📦 知识仓库更新",
-                  desp: ($author + " 提交了:\n\n" + $msg + "\n\n[查看详情](" + $url + ")")
-                }'
-              )"
-          done
+          # 文件变更统计
+          if git cat-file -e "${BEFORE}" 2>/dev/null; then
+            STATS=$(git diff --stat "${BEFORE}..${AFTER}" | tail -1)
+            ADDED=$(echo "$STATS" | grep -oP '\d+(?= insertion)' || echo 0)
+            DELETED=$(echo "$STATS" | grep -oP '\d+(?= deletion)' || echo 0)
+
+            FILES=$(git diff --stat "${BEFORE}..${AFTER}" | head -50 | sed 's/|/ \\| /' | sed 's/^/  • /')
+            FILE_COUNT=$(git diff --stat "${BEFORE}..${AFTER}" | wc -l)
+            # 最后一行是总计，不算文件
+            FILE_COUNT=$((FILE_COUNT - 1))
+          else
+            # 首次提交：列出本次 commit 的所有文件
+            ADDED=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | tail -1 | grep -oP '\d+(?= insertion)' || echo 0)
+            DELETED=0
+            FILES=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | head -50 | sed 's/|/ \\| /' | sed 's/^/  • /')
+            FILE_COUNT=$(git diff --stat 4b825dc642cb6eb9a060e54bf8993c6d42adeeec HEAD | wc -l)
+            FILE_COUNT=$((FILE_COUNT - 1))
+          fi
+
+          # 文件超过 5 个，只显示前 5 个 + 省略提示
+          FILES_TOP=$(echo "$FILES" | head -5)
+          if [ "$FILE_COUNT" -gt 5 ]; then
+            FILES_TOP="${FILES_TOP}
+            ... 等 $FILE_COUNT 个文件"
+          fi
+
+          # Markdown 正文
+          STATS_LINE="${ADDED} 新增 / ${DELETED} 删除"
+
+          CONTENT=$(cat <<MD
+          ### 📦 知识仓库更新
+
+          **${AUTHOR}** 提交了：
+          > ${MSG}
+
+          <font color="comment">📂 变更文件（${FILE_COUNT} 个）</font>
+          ${FILES_TOP}
+
+          📊 ${STATS_LINE}
+          🕐 ${DATE}
+
+          🔗 [查看详情](${URL})
+          MD
+          )
+
+          # 多个 UID 用英文逗号隔开
+          IFS=',' read -ra UIDS <<< "${{ secrets.WXPUSHER_UIDS }}"
+
+          curl -s -X POST "https://wxpusher.zjiecode.com/api/send/message" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg token "${{ secrets.WXPUSHER_APP_TOKEN }}" \
+              --arg content "$CONTENT" \
+              --argjson uids "$(printf '%s\n' "${UIDS[@]}" | jq -R . | jq -s .)" \
+              '{
+                appToken: $token,
+                content: $content,
+                contentType: 3,
+                summary: "知识仓库有更新",
+                uids: $uids
+              }'
+            )"
