@@ -60,6 +60,9 @@ knowledge-repo/
 │   ├── case-studies/                     项目复盘：从 0 到 1 / 架构演进 / 技术选型
 │   └── real-business/                    真实业务：业务逻辑 / 边界 case / 踩坑记录
 │
+├── share/                                 🔗 好文分享
+│   └── link.md                            优质技术文章 / 博客链接收藏
+│
 ├── templates/                            📝 笔记模板
 │
 ├── tools/                                🔨 开发工具
@@ -74,6 +77,8 @@ knowledge-repo/
 
 ## 笔记规范
 
+> 推荐 **Foam（VS Code 扩展）**，原生支持 frontmatter 标签面板，标签名支持中文等
+
 每篇 `.md` 文件以 YAML frontmatter 开头，只需 4 个字段：
 
 ```yaml
@@ -82,7 +87,7 @@ title: "文章标题"
 tags:
   - 标签1
   - 标签2
-created: 2026-07-15
+created: xxxx-xx-xx
 summary: "一句话摘要"
 ---
 ```
@@ -104,18 +109,24 @@ YAML frontmatter + 标准 Markdown 链接，可无缝迁移至：
 - **Docusaurus** — 功能全面
 - **Obsidian** — 本地笔记
 - **Hugo** — 静态站点
-- **Notion** — 需编写导入脚本
 
 ---
 
 ## ✅ update
 
+**2026-07-17**
+
+- 新增 `share/` 目录：优质技术文章链接收藏
+- 迁移原知识库：CSS(21)、JS(39)、Vue(2)、、网络(3)、补充知识点(8)、基础(7) 共 87 篇笔记  ——早期整理的，有蛮多不好的地方，可以更新补充
+
 **2026-07-16**
 
 - iframe 详解：使用、安全与最佳实践
 - 更新：MySQL 索引原理、失效场景与面试高频题
-- 中后台UI一致性
-- KOP 办公网域名适配
+- 业务整理
+  - 中后台UI一致性
+  - KOP 办公网域名适配(待更新)
+  - 林科楼文档迁移
 
 **2026-07-15**
 

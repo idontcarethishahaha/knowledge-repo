@@ -6,6 +6,7 @@ tags:
   - 跨域
   - CSS
   - 业务
+  - 实习
 created: 2026-07-16
 summary: "工作台基座工程通过iframe注入实现跨域子页面UI一致性"
 ---
