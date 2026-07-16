@@ -58,8 +58,7 @@ knowledge-repo/
 │
 ├── real-world/                           🌍 实战记录
 │   ├── case-studies/                     项目复盘：从 0 到 1 / 架构演进 / 技术选型
-│   ├── optimization/                     性能优化：慢接口 / 慢 SQL / 首屏 / 缓存策略
-│   └── troubleshooting/                  故障排查：Bug 定位 / 内存泄漏 / CPU 飙高
+│   └── real-business/                    真实业务：业务逻辑 / 边界 case / 踩坑记录
 │
 ├── templates/                            📝 笔记模板
 │
@@ -111,11 +110,15 @@ YAML frontmatter + 标准 Markdown 链接，可无缝迁移至：
 
 ## ✅ update
 
+**2026-07-16**
+
+- iframe 详解：使用、安全与最佳实践
+- 更新：MySQL 索引原理、失效场景与面试高频题
+- 中后台UI一致性
+- KOP 办公网域名适配
+
 **2026-07-15**
 
 - 初始化仓库
 - 创建飞书群聊机器人——知识库更新提醒
-
-**2026-07-16**
-
-- 更新：MySQL 索引原理、失效场景与面试高频题
+- 更新Git 常用命令、分支策略
