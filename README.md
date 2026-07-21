@@ -103,6 +103,11 @@ YAML frontmatter + 标准 Markdown 链接，可无缝迁移至：
 
 ## ✅ update
 
+**2026-07-21**
+
+- 新增 `redis/` 目录并更新：redis相关笔记
+- 更新：MySQL事务、ACID、隔离级别、MVCC 面试笔记
+
 **2026-07-19**
 
 - 搭建 VitePress 静态站点：自动侧边栏、本地搜索、首页导航
