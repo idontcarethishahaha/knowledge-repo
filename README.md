@@ -30,8 +30,7 @@ knowledge-repo/
 ├── backend/                              ⚙️ 后端
 │   └── database/                         🗄️ 数据存储
 │         └── sql/                          MySQL / PostgreSQL：索引 / 事务 / 锁 / SQL 优化
-│         ├── redis/
-│         └── nosql/ 
+│         └── redis/     
 ├── cs/                                   📖 计算机基础
 │   ├── algorithms/                       算法：排序 / 搜索 / 动态规划 / 贪心 / 回溯
 │   ├── data-structures/                  数据结构：数组 / 链表 / 树 / 图 / 哈希表 / 堆
